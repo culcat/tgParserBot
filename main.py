@@ -17,19 +17,24 @@ dp = Dispatcher()
 async def send_welcome(message: Message):
     await message.answer(
         "Это бот для парсинга телеграм каналов\n"
-        "Отправь имя канала и получи все сообщения в формате CSV.\n"
+        "Отправь имя канала и получи все сообщения в формате CSV\n"
         "Пример: @faithinmyselff"
     )
 
+
 @dp.message()
 async def handle_channel(message: Message):
-    await message.answer("Начинаю парсинг канала, подожди немного...")
+    await message.answer("Начинаю парсинг канала")
     try:
-        await async_parse_channel_to_csv(message.text)
-        await message.answer("Парсинг завершен ✅. Файл будет доступен позже (или реализуй отправку файла).")
+        csv_path = await async_parse_channel_to_csv(message.text)
+
+        input_file = types.FSInputFile(csv_path)
+        await message.answer_document(input_file)
+
+        csv_path.unlink()
+
     except Exception as e:
         await message.answer(f"Произошла ошибка: {e}")
-
 async def main():
     await dp.start_polling(bot)
 
